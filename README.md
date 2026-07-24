@@ -13,12 +13,21 @@ Business Intelligence diperlukan untuk:
 ## Tujuan Project
 
 1. **Analisis Data**: Memahami struktur dan karakteristik dataset
+<<<<<<< HEAD
 2. **Database Design**: Merancang database OLTP yang ternormalisasi menggunakan PostgreSQL
 3. **Data Warehouse**: Membangun Data Warehouse dengan Star Schema menggunakan dbt
 4. **ETL Process**: Mengimplementasikan proses ETL menggunakan Apache Airflow
 5. **OLAP Cube**: Merancang cube untuk analisis multidimensi
 6. **Data Mining**: Menggunakan K-Means Clustering untuk pengelompokan lagu
 7. **Reporting**: Membuat dashboard menggunakan Apache Superset
+=======
+2. **Database Design**: Merancang database OLTP yang ternormalisasi
+3. **Data Warehouse**: Membangun Data Warehouse dengan Star Schema
+4. **ETL Process**: Mengimplementasikan proses ETL menggunakan SSIS
+5. **OLAP Cube**: Merancang cube untuk analisis multidimensi
+6. **Data Mining**: Menggunakan K-Means Clustering untuk pengelompokan lagu
+7. **Reporting**: Membuat dashboard menggunakan SSRS
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 
 ## Deskripsi Dataset
 
@@ -57,7 +66,11 @@ Business Intelligence diperlukan untuk:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    BUSINESS INTEGRATION LAYER                    │
+<<<<<<< HEAD
 │  Apache Superset │ Grafana │ REST API │ Web Dashboard            │
+=======
+│  SSRS (Reporting) │ SSAS (OLAP) │ Power BI │ Excel             │
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 └─────────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────────┐
@@ -71,19 +84,31 @@ Business Intelligence diperlukan untuk:
 └─────────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────────┐
+<<<<<<< HEAD
 │                    ETL LAYER (Apache Airflow)                    │
+=======
+│                    ETL LAYER (SSIS)                              │
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 │  Extraction │ Staging │ Transformation │ Loading                 │
 └─────────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────────┐
 │                    DATA SOURCE LAYER                             │
+<<<<<<< HEAD
 │  ClassicHit.csv │ PostgreSQL (OLTP) │ Redis (Cache)             │
+=======
+│  ClassicHit.csv │ SpotifyClassicHit_DB (OLTP)                   │
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Perancangan Database
 
+<<<<<<< HEAD
 ### Database OLTP: PostgreSQL
+=======
+### Database OLTP: SpotifyClassicHit_DB
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 
 **ERD (Entity Relationship Diagram)**:
 
@@ -129,7 +154,11 @@ Business Intelligence diperlukan untuk:
 
 **Normalisasi**: 3NF (Third Normal Form)
 
+<<<<<<< HEAD
 ### Data Warehouse: Star Schema
+=======
+### Data Warehouse: SpotifyClassicHit_DW
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 
 **Star Schema**:
 
@@ -176,7 +205,11 @@ Business Intelligence diperlukan untuk:
 - `agg_genre_stats` - 991 records
 - `agg_artist_stats` - 8,565 records
 
+<<<<<<< HEAD
 ## ETL (Apache Airflow)
+=======
+## ETL (SSIS)
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 
 ### Proses ETL
 
@@ -194,6 +227,7 @@ Business Intelligence diperlukan untuk:
 CSV File → Staging Table → Data Cleaning → Dimension Tables → Fact Table → Aggregate Tables
 ```
 
+<<<<<<< HEAD
 ## Data Transformation (dbt)
 
 ### Models
@@ -209,6 +243,32 @@ CSV File → Staging Table → Data Cleaning → Dimension Tables → Fact Table
 - Not null tests on required fields
 - Referential integrity tests on foreign keys
 - Accepted value tests on categorical fields
+=======
+## Analysis Services (SSAS)
+
+### OLAP Cube: SpotifyClassicHit_Cube
+
+**Dimensions**:
+1. DimGenre - Genre musik
+2. DimArtist - Artis/Penyanyi
+3. DimTime - Waktu (Tahun, Dekade, Quarter)
+4. DimTrack - Informasi lagu
+5. DimAudioFeatures - Level Energy dan Danceability
+
+**Measures**:
+- Track Count (COUNT)
+- Average Popularity (AVG)
+- Average Energy (AVG)
+- Average Danceability (AVG)
+- Average Loudness (AVG)
+- Average Tempo (AVG)
+
+**KPIs**:
+1. Track Popularity KPI - Target: 50
+2. Energy Level KPI - Target: 0.60
+3. Danceability KPI - Target: 0.55
+4. Track Count Growth KPI - Target: 100
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 
 ## Data Mining
 
@@ -244,7 +304,11 @@ CSV File → Staging Table → Data Cleaning → Dimension Tables → Fact Table
 - Cluster 3: Cocok untuk playlist workout/gym
 - Cluster 4: Cocok untuk playlist happy/morning
 
+<<<<<<< HEAD
 ## Reporting (Apache Superset)
+=======
+## Reporting Services (SSRS)
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 
 ### Dashboard yang Dibuat
 
@@ -260,6 +324,7 @@ CSV File → Staging Table → Data Cleaning → Dimension Tables → Fact Table
 ## Struktur Folder Project
 
 ```
+<<<<<<< HEAD
 C:\Users\ASUS\Documents\PROJECT BI\
 ├── ClassicHit.csv                    # Dataset utama
 ├── Data Spotify/                     # Backup dataset
@@ -341,12 +406,54 @@ C:\Users\ASUS\Documents\PROJECT BI\
     ├── architecture.md
     ├── data_dictionary.md
     └── api_documentation.md
+=======
+C:\Users\ASUS\Documents\BI\
+├── ClassicHit.csv                    # Dataset utama
+├── Data Spotify/                     # Backup dataset
+├── README.md                         # Dokumentasi ini
+├── scripts/                          # Script Python
+│   ├── 01_analisis_dataset.py        # Phase 1: Analisis dataset
+│   ├── 02_preprocess_oltp.py         # Phase 2: Preprocessing OLTP
+│   ├── 03_dw_dictionary_mapping.py   # Phase 3: DW dictionary & mapping
+│   ├── 03_populate_dw.py             # Phase 3: Populate Data Warehouse
+│   ├── 04_ssis_etl_design.py         # Phase 4: SSIS ETL design
+│   ├── 05_ssis_olap_design.py        # Phase 5: SSAS OLAP design
+│   ├── 06_kmeans_clustering.py       # Phase 6: K-Means clustering
+│   ├── 07_ssrs_dashboard.py          # Phase 7: SSRS dashboard design
+│   └── 08_visualisasi_reporting.py   # Phase 8: Visualisasi reporting
+├── sql/                              # Script SQL
+│   ├── oltp/
+│   │   └── 01_create_database.sql    # Create OLTP database
+│   ├── dw/
+│   │   └── 01_create_datawarehouse.sql # Create Data Warehouse
+│   ├── ssis/                         # SSIS scripts
+│   ├── ssas/                         # SSAS scripts
+│   ├── ssrs/                         # SSRS queries
+│   └── datamining/                   # Data mining scripts
+└── outputs/                          # Hasil analisis
+    ├── 01_analisis_ringkasan.json    # Ringkasan analisis
+    ├── 01_distribusi_data.png        # Visualisasi distribusi
+    ├── 02_boxplot_outlier.png        # Boxplot outlier
+    ├── 03_heatmap_korelasi.png       # Heatmap korelasi
+    ├── 04_scatter_plots.png          # Scatter plots
+    ├── oltp_*.csv                    # Data OLTP
+    ├── datawarehouse/                # Data Warehouse
+    │   ├── dw_dim_*.csv              # Dimension tables
+    │   ├── dw_fact_*.csv             # Fact tables
+    │   └── dw_agg_*.csv              # Aggregate tables
+    ├── classic_hit_clustered.csv     # Data dengan cluster
+    ├── cluster_centers.csv           # Pusat cluster
+    ├── cluster_insights.csv          # Insight clustering
+    ├── 06_*.png                      # Visualisasi clustering
+    └── 07-14_*.png                   # Visualisasi dashboard
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 ```
 
 ## Cara Menjalankan Project
 
 ### Prerequisites
 
+<<<<<<< HEAD
 1. **Node.js 20+** dengan packages:
    ```bash
    npm install
@@ -452,17 +559,70 @@ C:\Users\ASUS\Documents\PROJECT BI\
 - **Prettier** - Code formatting
 - **Jest** - Testing framework
 
+=======
+1. **Python 3.12+** dengan libraries:
+   ```
+   pip install pandas numpy matplotlib plotly scikit-learn
+   ```
+
+2. **SQL Server 2022** dengan:
+   - SSIS (Integration Services)
+   - SSAS (Analysis Services)
+   - SSRS (Reporting Services)
+
+### Langkah-langkah
+
+1. **Phase 1 - Analisis Dataset**:
+   ```bash
+   python scripts/01_analisis_dataset.py
+   ```
+
+2. **Phase 2 - Preprocessing OLTP**:
+   ```bash
+   python scripts/02_preprocess_oltp.py
+   ```
+
+3. **Phase 3 - Populasi Data Warehouse**:
+   ```bash
+   python scripts/03_populate_dw.py
+   ```
+
+4. **Phase 4-7 - SSIS/SSAS/SSRS**:
+   - Buka SQL Server Data Tools (SSDT)
+   - Import script SQL dari folder `sql/`
+   - Jalankan ETL package
+
+5. **Phase 6 - Data Mining**:
+   ```bash
+   python scripts/06_kmeans_clustering.py
+   ```
+
+6. **Phase 8 - Visualisasi**:
+   ```bash
+   python scripts/08_visualisasi_reporting.py
+   ```
+
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 ## Kesimpulan
 
 Project Business Intelligence ini berhasil:
 
 1. ✅ Menganalisis dataset Spotify dengan 15,150 records
+<<<<<<< HEAD
 2. ✅ Merancang database OLTP dengan 5 tabel (3NF) menggunakan PostgreSQL
 3. ✅ Membangun Data Warehouse dengan Star Schema menggunakan dbt
 4. ✅ Mendesain proses ETL menggunakan Apache Airflow
 5. ✅ Mengimplementasikan K-Means Clustering dengan 5 clusters
 6. ✅ Membuat 8 dashboard menggunakan Apache Superset
 7. ✅ Mengembangkan REST API untuk akses data
+=======
+2. ✅ Merancang database OLTP dengan 5 tabel (3NF)
+3. ✅ Membangun Data Warehouse dengan Star Schema
+4. ✅ Mendesain proses ETL menggunakan SSIS
+5. ✅ Merancang OLAP Cube dengan 5 dimensions dan 2 measure groups
+6. ✅ Mengimplementasikan K-Means Clustering dengan 5 clusters
+7. ✅ Membuat 8 dashboard menggunakan SSRS
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 
 **Hasil Utama**:
 - Genre Pop mendominasi dengan 24.22% dari total lagu
@@ -473,6 +633,7 @@ Project Business Intelligence ini berhasil:
 
 ## Pengembangan Selanjutnya
 
+<<<<<<< HEAD
 1. **Real-time ETL**: Implementasi CDC (Change Data Capture) dengan Debezium
 2. **Machine Learning**: Tambahkan model prediksi popularitas
 3. **Web Dashboard**: Frontend dengan React atau Vue.js
@@ -483,9 +644,23 @@ Project Business Intelligence ini berhasil:
 8. **Automation**: Schedule otomatis untuk ETL dan reporting
 9. **Monitoring**: Implementasi observability dengan Prometheus dan Grafana
 10. **CI/CD**: Pipeline otomatis dengan GitHub Actions
+=======
+1. **Real-time ETL**: Implementasi CDC (Change Data Capture)
+2. **Machine Learning**: Tambahkan model prediksi popularitas
+3. **Web Dashboard**: Integrasi dengan Power BI Service
+4. **Mobile App**: Aplikasi mobile untuk akses laporan
+5. **Data Quality**: Implementasi data quality rules
+6. **Performance**: Optimasi query dan indexing
+7. **Security**: Implementasi row-level security
+8. **Automation**: Schedule otomatis untuk ETL dan reporting
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
 
 ---
 
 **Author**: BI Project Team
 **Date**: July 2026
+<<<<<<< HEAD
 **Tools**: Node.js 20+, PostgreSQL 16, Apache Airflow, dbt, Apache Superset, Docker
+=======
+**Tools**: Python 3.12, SQL Server 2022, SSIS, SSAS, SSRS
+>>>>>>> a2496dbfcd7b52f8e29bc54155946a1f6ee5ad3d
