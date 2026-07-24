@@ -1,0 +1,9 @@
+const express = require('express');
+const router = express.Router();
+const artistController = require('../controllers/artistController');
+
+router.get('/', artistController.getAll);
+router.get('/top', artistController.getTop);
+router.get('/:id', artistController.getById);
+
+module.exports = router;
