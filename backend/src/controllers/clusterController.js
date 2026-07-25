@@ -39,7 +39,11 @@ const clusterController = {
 
   async runClustering(req, res, next) {
     try {
-      const result = await ClusterService.runClustering();
+      const k = parseInt(req.body.k) || 5;
+      if (k < 2 || k > 20) {
+        return res.status(400).json({ error: 'K must be between 2 and 20' });
+      }
+      const result = await ClusterService.runClustering(k);
       res.json({ message: 'Clustering completed', ...result });
     } catch (err) {
       next(err);

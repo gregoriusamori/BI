@@ -1,18 +1,74 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import Card from '../components/Common/Card';
 import DataTable from '../components/Common/DataTable';
-import { Upload, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Upload, CheckCircle, XCircle, FileSpreadsheet } from 'lucide-react';
 
 export default function IntegrationPage() {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
-    api.get('/integration/history').then(r => setHistory(r.data)).catch(() => {});
+    api.get('/integration/history')
+      .then(r => setHistory(r.data))
+      .catch(() => {});
   }, []);
+
+  const validateFile = (f) => {
+    if (!f) return { valid: false, error: 'No file selected' };
+    if (!f.name.endsWith('.csv')) {
+      return { valid: false, error: 'Only CSV files are supported' };
+    }
+    if (f.size > 50 * 1024 * 1024) {
+      return { valid: false, error: 'File size must be less than 50MB' };
+    }
+    return { valid: true };
+  };
+
+  const handleFile = (f) => {
+    setResult(null);
+    const validation = validateFile(f);
+    if (!validation.valid) {
+      setResult({ error: validation.error });
+      return;
+    }
+    setFile(f);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleInputChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  };
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -28,9 +84,10 @@ export default function IntegrationPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setResult(res.data);
+      setFile(null);
       api.get('/integration/history').then(r => setHistory(r.data));
     } catch (err) {
-      setResult({ error: err.response?.data?.error || 'Import failed' });
+      setResult({ error: err.response?.data?.error || 'Import failed. Please try again.' });
     } finally {
       setUploading(false);
     }
@@ -49,23 +106,46 @@ export default function IntegrationPage() {
 
       <Card title="Import Dataset">
         <form onSubmit={handleUpload} className="space-y-4">
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 transition">
-            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600 mb-3">Drop your CSV file here or click to browse</p>
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={handleBrowseClick}
+            className={`
+              border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all
+              ${dragActive
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+              }
+            `}
+          >
             <input
+              ref={fileInputRef}
               type="file"
               accept=".csv"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="block mx-auto text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              onChange={handleInputChange}
+              className="hidden"
             />
-          </div>
 
-          {file && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              {file.name} ({(file.size / 1024).toFixed(1)} KB)
-            </div>
-          )}
+            {file ? (
+              <>
+                <FileSpreadsheet className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                <p className="text-gray-800 font-medium">{file.name}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {(file.size / 1024).toFixed(1)} KB — Click or drop to replace
+                </p>
+              </>
+            ) : (
+              <>
+                <Upload className={`w-12 h-12 mx-auto mb-3 ${dragActive ? 'text-blue-500' : 'text-gray-400'}`} />
+                <p className="text-gray-600 mb-1">
+                  {dragActive ? 'Release to upload file' : 'Drag & drop your CSV file here'}
+                </p>
+                <p className="text-sm text-gray-400">or click to browse</p>
+                <p className="text-xs text-gray-400 mt-2">CSV files up to 50MB</p>
+              </>
+            )}
+          </div>
 
           <button
             type="submit"

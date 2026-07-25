@@ -1,23 +1,22 @@
-import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import useFetch from '../hooks/useFetch';
 import Card from '../components/Common/Card';
 import StatCard from '../components/Common/StatCard';
+import LoadingSpinner from '../components/Common/LoadingSpinner';
+import ErrorMessage from '../components/Common/ErrorMessage';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, LineChart, Line } from 'recharts';
 
 export default function BIPage() {
-  const [overview, setOverview] = useState(null);
-  const [genres, setGenres] = useState([]);
-  const [audioStats, setAudioStats] = useState(null);
-  const [popDist, setPopDist] = useState([]);
-  const [yearTrend, setYearTrend] = useState([]);
+  const { data: overview, loading: l1, error: e1, refetch: r1 } = useFetch('/bi/overview');
+  const { data: genres, loading: l2, error: e2, refetch: r2 } = useFetch('/bi/genre-distribution');
+  const { data: audioStats, loading: l3, error: e3, refetch: r3 } = useFetch('/bi/audio-features');
+  const { data: popDist, loading: l4, error: e4, refetch: r4 } = useFetch('/bi/popularity-distribution');
+  const { data: yearTrend, loading: l5, error: e5, refetch: r5 } = useFetch('/bi/year-trend');
 
-  useEffect(() => {
-    api.get('/bi/overview').then(r => setOverview(r.data));
-    api.get('/bi/genre-distribution').then(r => setGenres(r.data));
-    api.get('/bi/audio-features').then(r => setAudioStats(r.data));
-    api.get('/bi/popularity-distribution').then(r => setPopDist(r.data));
-    api.get('/bi/year-trend').then(r => setYearTrend(r.data.slice(-20)));
-  }, []);
+  const loading = l1 || l2 || l3 || l4 || l5;
+  const error = e1 || e2 || e3 || e4 || e5;
+
+  if (loading) return <LoadingSpinner text="Loading BI analysis..." />;
+  if (error) return <ErrorMessage message={error} onRetry={() => { r1(); r2(); r3(); r4(); r5(); }} />;
 
   const radarData = audioStats ? [
     { feature: 'Dance', value: Number(audioStats.avg_danceability) * 100 },
@@ -76,7 +75,7 @@ export default function BIPage() {
 
         <Card title="Track Count by Year (Last 20)">
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={yearTrend}>
+            <LineChart data={yearTrend?.slice(-20)}>
               <XAxis dataKey="year" tick={{ fontSize: 11 }} />
               <YAxis />
               <Tooltip />

@@ -54,7 +54,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-white/10 border border-white/20 rounded-lg pl-11 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                  placeholder="admin@bi.com"
+                  placeholder="you@example.com"
                   required
                 />
               </div>
@@ -69,7 +69,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-white/10 border border-white/20 rounded-lg pl-11 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                  placeholder="password"
+                  placeholder="Enter your password"
                   required
                 />
               </div>
@@ -84,13 +84,15 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          <p className="text-center text-gray-400 text-sm mt-4">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-blue-400 hover:text-blue-300">Register</Link>
-          </p>
-
-          <div className="mt-4 p-3 bg-white/5 rounded-lg text-xs text-gray-400">
-            <p>Admin: admin@bi.com / password</p>
+          <div className="flex items-center justify-between mt-4 text-sm">
+            <Link to="/register" className="text-blue-400 hover:text-blue-300">Create account</Link>
+            <button
+              type="button"
+              onClick={() => alert('Please contact your administrator to reset your password.')}
+              className="text-gray-400 hover:text-gray-300"
+            >
+              Forgot password?
+            </button>
           </div>
         </form>
       </div>

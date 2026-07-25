@@ -1,27 +1,38 @@
 import { useState, useEffect } from 'react';
+import useFetch from '../hooks/useFetch';
 import api from '../api/axios';
 import Card from '../components/Common/Card';
 import DataTable from '../components/Common/DataTable';
-import { ScatterChart, Scatter, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import LoadingSpinner from '../components/Common/LoadingSpinner';
+import ErrorMessage from '../components/Common/ErrorMessage';
+import CorrelationHeatmap from '../components/Common/CorrelationHeatmap';
 
 export default function MiningPage() {
-  const [correlation, setCorrelation] = useState(null);
-  const [featureStats, setFeatureStats] = useState(null);
-  const [patterns, setPatterns] = useState([]);
+  const { data: correlation, loading: l1, error: e1, refetch: r1 } = useFetch('/mining/correlation');
+  const { data: featureStats, loading: l2, error: e2, refetch: r2 } = useFetch('/mining/feature-stats');
+  const { data: patterns, loading: l3, error: e3, refetch: r3 } = useFetch('/mining/patterns');
+
   const [selectedCol, setSelectedCol] = useState('danceability');
   const [outliers, setOutliers] = useState([]);
+  const [outlierLoading, setOutlierLoading] = useState(false);
+  const [outlierError, setOutlierError] = useState(null);
 
   useEffect(() => {
-    api.get('/mining/correlation').then(r => setCorrelation(r.data));
-    api.get('/mining/feature-stats').then(r => setFeatureStats(r.data));
-    api.get('/mining/patterns').then(r => setPatterns(r.data));
-  }, []);
-
-  useEffect(() => {
-    api.get(`/mining/outliers/${selectedCol}`).then(r => setOutliers(r.data));
+    setOutlierLoading(true);
+    setOutlierError(null);
+    api.get(`/mining/outliers/${selectedCol}`)
+      .then(r => setOutliers(r.data))
+      .catch(() => setOutlierError('Failed to load outliers'))
+      .finally(() => setOutlierLoading(false));
   }, [selectedCol]);
 
-  const columns = [
+  const loading = l1 || l2 || l3;
+  const error = e1 || e2 || e3;
+
+  if (loading) return <LoadingSpinner text="Loading data mining..." />;
+  if (error) return <ErrorMessage message={error} onRetry={() => { r1(); r2(); r3(); }} />;
+
+  const outlierColumns = [
     { header: 'Track', accessor: 'track_name' },
     { header: 'Artist', accessor: 'artist_name' },
     { header: 'Value', accessor: selectedCol },
@@ -50,9 +61,9 @@ export default function MiningPage() {
                   {featureNames.map(f => (
                     <tr key={f} className="border-b border-gray-100">
                       <td className="py-2 px-3 capitalize">{f}</td>
-                      <td className="py-2 px-3 text-right">{Number(featureStats[`min_${f}`]).toFixed(3)}</td>
-                      <td className="py-2 px-3 text-right">{Number(featureStats[`max_${f}`]).toFixed(3)}</td>
-                      <td className="py-2 px-3 text-right">{Number(featureStats[`avg_${f}`]).toFixed(3)}</td>
+                      <td className="py-2 px-3 text-right">{Number(featureStats[`min_${f}`] || 0).toFixed(3)}</td>
+                      <td className="py-2 px-3 text-right">{Number(featureStats[`max_${f}`] || 0).toFixed(3)}</td>
+                      <td className="py-2 px-3 text-right">{Number(featureStats[`avg_${f}`] || 0).toFixed(3)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -62,50 +73,43 @@ export default function MiningPage() {
         </Card>
 
         <Card title="Correlation Matrix">
-          {correlation && (
-            <div className="grid grid-cols-2 gap-3">
-              {Object.entries(correlation).map(([key, val]) => (
-                <div key={key} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
-                  <span className="text-xs text-gray-600 capitalize">{key.replace(/_/g, ' ')}</span>
-                  <span className={`text-sm font-bold ${Number(val) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {Number(val).toFixed(3)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+          <CorrelationHeatmap data={correlation} />
         </Card>
       </div>
 
       <Card title="Genre Patterns">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-2 px-3 font-semibold text-gray-600">Genre</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-600">Tracks</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-600">Energy</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-600">Dance</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-600">Valence</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-600">Acoustic</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-600">Popularity</th>
-              </tr>
-            </thead>
-            <tbody>
-              {patterns.map((p, i) => (
-                <tr key={i} className="border-b border-gray-100">
-                  <td className="py-2 px-3 font-medium">{p.genre_name}</td>
-                  <td className="py-2 px-3 text-right">{p.track_count}</td>
-                  <td className="py-2 px-3 text-right">{Number(p.avg_energy).toFixed(3)}</td>
-                  <td className="py-2 px-3 text-right">{Number(p.avg_danceability).toFixed(3)}</td>
-                  <td className="py-2 px-3 text-right">{Number(p.avg_valence).toFixed(3)}</td>
-                  <td className="py-2 px-3 text-right">{Number(p.avg_acousticness).toFixed(3)}</td>
-                  <td className="py-2 px-3 text-right">{Number(p.avg_popularity).toFixed(1)}</td>
+        {patterns?.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-2 px-3 font-semibold text-gray-600">Genre</th>
+                  <th className="text-right py-2 px-3 font-semibold text-gray-600">Tracks</th>
+                  <th className="text-right py-2 px-3 font-semibold text-gray-600">Energy</th>
+                  <th className="text-right py-2 px-3 font-semibold text-gray-600">Dance</th>
+                  <th className="text-right py-2 px-3 font-semibold text-gray-600">Valence</th>
+                  <th className="text-right py-2 px-3 font-semibold text-gray-600">Acoustic</th>
+                  <th className="text-right py-2 px-3 font-semibold text-gray-600">Popularity</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {patterns.map((p, i) => (
+                  <tr key={i} className="border-b border-gray-100">
+                    <td className="py-2 px-3 font-medium">{p.genre_name}</td>
+                    <td className="py-2 px-3 text-right">{p.track_count}</td>
+                    <td className="py-2 px-3 text-right">{Number(p.avg_energy || 0).toFixed(3)}</td>
+                    <td className="py-2 px-3 text-right">{Number(p.avg_danceability || 0).toFixed(3)}</td>
+                    <td className="py-2 px-3 text-right">{Number(p.avg_valence || 0).toFixed(3)}</td>
+                    <td className="py-2 px-3 text-right">{Number(p.avg_acousticness || 0).toFixed(3)}</td>
+                    <td className="py-2 px-3 text-right">{Number(p.avg_popularity || 0).toFixed(1)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">No patterns found. Import data first.</p>
+        )}
       </Card>
 
       <Card title="Outlier Detection">
@@ -121,7 +125,13 @@ export default function MiningPage() {
             ))}
           </select>
         </div>
-        <DataTable columns={columns} data={outliers} />
+        {outlierLoading ? (
+          <LoadingSpinner text="Loading outliers..." />
+        ) : outlierError ? (
+          <ErrorMessage message={outlierError} />
+        ) : (
+          <DataTable columns={outlierColumns} data={outliers} />
+        )}
       </Card>
     </div>
   );

@@ -7,18 +7,32 @@ export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     setLoading(true);
     try {
       await register(username, email, password);
-      navigate('/login');
+      setSuccess(true);
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
@@ -42,6 +56,12 @@ export default function RegisterPage() {
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 text-red-300 text-sm rounded-lg px-4 py-3 mb-4">
               {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-500/20 border border-green-500/50 text-green-300 text-sm rounded-lg px-4 py-3 mb-4">
+              Account created! Redirecting to login...
             </div>
           )}
 
@@ -91,11 +111,33 @@ export default function RegisterPage() {
                 />
               </div>
             </div>
+
+            <div>
+              <label className="block text-sm text-gray-300 mb-1.5">Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`w-full bg-white/10 border rounded-lg pl-11 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none ${
+                    confirmPassword && password !== confirmPassword
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-white/20 focus:border-blue-500'
+                  }`}
+                  placeholder="re-enter password"
+                  required
+                />
+              </div>
+              {confirmPassword && password !== confirmPassword && (
+                <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+              )}
+            </div>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || success}
             className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50"
           >
             {loading ? 'Creating account...' : 'Register'}

@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import useFetch from '../hooks/useFetch';
 import StatCard from '../components/Common/StatCard';
 import Card from '../components/Common/Card';
-import { BarChart3, Music, Users, Disc, TrendingUp } from 'lucide-react';
+import LoadingSpinner from '../components/Common/LoadingSpinner';
+import ErrorMessage from '../components/Common/ErrorMessage';
+import { Music, Users, Disc, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 
 const COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#84CC16'];
 
 export default function Dashboard() {
-  const [overview, setOverview] = useState(null);
-  const [genres, setGenres] = useState([]);
-  const [yearTrend, setYearTrend] = useState([]);
-  const [topArtists, setTopArtists] = useState([]);
+  const { data: overview, loading: l1, error: e1, refetch: r1 } = useFetch('/bi/overview');
+  const { data: genres, loading: l2, error: e2, refetch: r2 } = useFetch('/bi/genre-distribution');
+  const { data: yearTrend, loading: l3, error: e3, refetch: r3 } = useFetch('/bi/year-trend');
+  const { data: topArtists, loading: l4, error: e4, refetch: r4 } = useFetch('/bi/top-artists?limit=8');
 
-  useEffect(() => {
-    api.get('/bi/overview').then(r => setOverview(r.data));
-    api.get('/bi/genre-distribution').then(r => setGenres(r.data));
-    api.get('/bi/year-trend').then(r => setYearTrend(r.data.slice(-30)));
-    api.get('/bi/top-artists?limit=8').then(r => setTopArtists(r.data));
-  }, []);
+  const loading = l1 || l2 || l3 || l4;
+  const error = e1 || e2 || e3 || e4;
+
+  if (loading) return <LoadingSpinner text="Loading dashboard..." />;
+  if (error) return <ErrorMessage message={error} onRetry={() => { r1(); r2(); r3(); r4(); }} />;
 
   return (
     <div className="space-y-6">
@@ -45,7 +45,7 @@ export default function Dashboard() {
 
         <Card title="Tracks by Year">
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={yearTrend}>
+            <LineChart data={yearTrend?.slice(-30)}>
               <XAxis dataKey="year" tick={{ fontSize: 11 }} />
               <YAxis />
               <Tooltip />
@@ -58,7 +58,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Top Artists">
           <div className="space-y-3">
-            {topArtists.map((a, i) => (
+            {topArtists?.map((a, i) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
@@ -79,7 +79,7 @@ export default function Dashboard() {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={genres.slice(0, 8)}
+                data={genres?.slice(0, 8)}
                 dataKey="count"
                 nameKey="genre_name"
                 cx="50%"
@@ -87,7 +87,7 @@ export default function Dashboard() {
                 outerRadius={100}
                 label={({ genre_name, percent }) => `${genre_name} ${(percent * 100).toFixed(0)}%`}
               >
-                {genres.slice(0, 8).map((_, i) => (
+                {genres?.slice(0, 8).map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>

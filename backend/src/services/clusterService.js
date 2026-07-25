@@ -54,7 +54,7 @@ const ClusterService = {
     return result.rows;
   },
 
-  async runClustering() {
+  async runClustering(k = 5) {
     const result = await pool.query(`
       WITH features AS (
         SELECT track_id, danceability, energy, loudness, speechiness,
@@ -74,7 +74,6 @@ const ClusterService = {
     `);
 
     const data = result.rows;
-    const k = 5;
     const maxIter = 50;
 
     let centroids = data.slice(0, k).map(d => [d.n_dance, d.n_energy, d.n_valence, d.n_acoustic, d.n_tempo]);
@@ -122,7 +121,11 @@ const ClusterService = {
 
     await pool.query('DELETE FROM tbl_track_clusters');
 
-    const labels = ['Low Energy Acoustic', 'High Speechiness', 'Instrumental', 'High Energy', 'Happy/Upbeat'];
+    const defaultLabels = ['Low Energy Acoustic', 'High Speechiness', 'Instrumental', 'High Energy', 'Happy/Upbeat'];
+    const labels = defaultLabels.slice(0, k);
+    while (labels.length < k) {
+      labels.push(`Cluster ${labels.length}`);
+    }
 
     for (let i = 0; i < data.length; i++) {
       await pool.query(
