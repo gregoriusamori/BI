@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BarChart3, Database, GitBranch, FileText, Upload, PieChart, ArrowRight, Users, Music, Disc, Calendar, ChevronRight, Layers, Zap, Target } from 'lucide-react';
+import { BarChart3, Database, GitBranch, FileText, Upload, PieChart, ArrowRight, Users, Music, Disc, Calendar, ChevronRight, Layers, Zap, Target, Github } from 'lucide-react';
 
 const features = [
   { icon: BarChart3, title: 'BI Analysis', desc: 'Interactive charts and real-time analytics for deep data understanding.' },
@@ -28,24 +28,24 @@ export default function LandingPage() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 overflow-hidden">
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between px-6 lg:px-8 py-4 border-b border-white/10">
+      <nav className="flex items-center justify-between px-6 lg:px-8 py-4 border-b border-white/10 animate-fade-in-down">
         <div className="flex items-center gap-2 text-white font-bold text-xl">
-          <BarChart3 className="w-7 h-7" />
+          <BarChart3 className="w-7 h-7 animate-float" />
           BI Dashboard
         </div>
         <div className="flex items-center gap-3">
           {user ? (
-            <Link to="/dashboard" className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+            <Link to="/dashboard" className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium hover:scale-105 transform">
               Go to Dashboard
             </Link>
           ) : (
             <>
-              <Link to="/login" className="px-5 py-2 text-white border border-white/30 rounded-lg hover:bg-white/10 transition text-sm">
+              <Link to="/login" className="px-5 py-2 text-white border border-white/30 rounded-lg hover:bg-white/10 transition text-sm hover:scale-105 transform">
                 Login
               </Link>
-              <Link to="/register" className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+              <Link to="/register" className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium hover:scale-105 transform">
                 Register
               </Link>
             </>
@@ -55,26 +55,26 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 lg:px-8 pt-20 pb-16 text-center">
-        <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 rounded-full px-4 py-1.5 mb-6">
-          <Zap className="w-4 h-4 text-blue-400" />
+        <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 rounded-full px-4 py-1.5 mb-6 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <Zap className="w-4 h-4 text-blue-400 animate-pulse-glow" />
           <span className="text-sm text-blue-300">Powered by Node.js, React & PostgreSQL</span>
         </div>
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '200ms' }}>
           Business Intelligence<br />Dashboard
         </h1>
-        <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10">
+        <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
           Analyze, visualize, and discover insights from your data. Built for the Spotify Classic Hits dataset with 15,000+ records.
         </p>
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
           <Link
             to={user ? '/dashboard' : '/register'}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium text-lg shadow-lg shadow-blue-600/25"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium text-lg shadow-lg shadow-blue-600/25 hover:scale-105 transform hover:shadow-xl hover:shadow-blue-600/30 animate-pulse-glow"
           >
             Get Started <ArrowRight className="w-5 h-5" />
           </Link>
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-white rounded-xl hover:bg-white/10 transition font-medium text-lg"
+            className="inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-white rounded-xl hover:bg-white/10 transition font-medium text-lg hover:scale-105 transform"
           >
             View Demo
           </Link>
@@ -88,7 +88,7 @@ export default function LandingPage() {
             {stats.map((s, i) => {
               const Icon = s.icon;
               return (
-                <div key={i} className="text-center">
+                <div key={i} className="text-center animate-fade-in-up hover:scale-110 transform transition duration-300" style={{ animationDelay: `${i * 100}ms` }}>
                   <Icon className="w-8 h-8 text-blue-400 mx-auto mb-2" />
                   <p className="text-2xl md:text-3xl font-bold text-white">{s.value}</p>
                   <p className="text-sm text-gray-400 mt-1">{s.label}</p>
@@ -102,15 +102,19 @@ export default function LandingPage() {
       {/* FEATURES */}
       <section className="max-w-6xl mx-auto px-6 lg:px-8 py-20">
         <div className="text-center mb-14">
-          <h2 className="text-3xl font-bold text-white mb-3">Everything You Need</h2>
-          <p className="text-gray-400 max-w-xl mx-auto">Full-stack BI platform with analysis, mining, clustering, and reporting — all in one dashboard.</p>
+          <h2 className="text-3xl font-bold text-white mb-3 animate-fade-in-up">Everything You Need</h2>
+          <p className="text-gray-400 max-w-xl mx-auto animate-fade-in-up" style={{ animationDelay: '100ms' }}>Full-stack BI platform with analysis, mining, clustering, and reporting — all in one dashboard.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((f, i) => {
             const Icon = f.icon;
             return (
-              <div key={i} className="group bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-blue-500/30 transition-all duration-300">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition">
+              <div
+                key={i}
+                className="group bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-blue-500/30 transition-all duration-300 hover:scale-105 hover:-translate-y-2 animate-fade-in-up"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition group-hover:scale-110 transform">
                   <Icon className="w-6 h-6 text-blue-400" />
                 </div>
                 <h3 className="text-white font-semibold text-lg mb-2">{f.title}</h3>
@@ -125,17 +129,17 @@ export default function LandingPage() {
       <section className="bg-white/5 border-y border-white/10">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 py-20">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-white mb-3">How It Works</h2>
-            <p className="text-gray-400">Three simple steps to get insights from your data.</p>
+            <h2 className="text-3xl font-bold text-white mb-3 animate-fade-in-up">How It Works</h2>
+            <p className="text-gray-400 animate-fade-in-up" style={{ animationDelay: '100ms' }}>Three simple steps to get insights from your data.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {steps.map((s, i) => (
-              <div key={i} className="relative text-center md:text-left">
-                <div className="text-5xl font-bold text-blue-500/20 mb-4">{s.num}</div>
+              <div key={i} className="relative text-center md:text-left animate-fade-in-up hover:scale-105 transform transition duration-300" style={{ animationDelay: `${i * 200}ms` }}>
+                <div className="text-5xl font-bold text-blue-500/20 mb-4 group-hover:text-blue-500/40 transition">{s.num}</div>
                 <h3 className="text-white font-semibold text-xl mb-2">{s.title}</h3>
                 <p className="text-gray-400 text-sm leading-relaxed">{s.desc}</p>
                 {i < steps.length - 1 && (
-                  <ChevronRight className="hidden md:block absolute top-8 -right-4 w-8 h-8 text-white/10" />
+                  <ChevronRight className="hidden md:block absolute top-8 -right-4 w-8 h-8 text-white/10 animate-pulse" />
                 )}
               </div>
             ))}
@@ -146,8 +150,8 @@ export default function LandingPage() {
       {/* TECH STACK */}
       <section className="max-w-6xl mx-auto px-6 lg:px-8 py-20">
         <div className="text-center mb-14">
-          <h2 className="text-3xl font-bold text-white mb-3">Built With Modern Stack</h2>
-          <p className="text-gray-400">Industry-standard tools for reliability and performance.</p>
+          <h2 className="text-3xl font-bold text-white mb-3 animate-fade-in-up">Built With Modern Stack</h2>
+          <p className="text-gray-400 animate-fade-in-up" style={{ animationDelay: '100ms' }}>Industry-standard tools for reliability and performance.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
@@ -156,7 +160,7 @@ export default function LandingPage() {
             { name: 'PostgreSQL', desc: 'Database' },
             { name: 'TailwindCSS', desc: 'Styling' },
           ].map((t, i) => (
-            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-5 text-center hover:border-blue-500/30 transition">
+            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-5 text-center hover:border-blue-500/30 transition hover:scale-105 hover:-translate-y-1 transform duration-300 animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
               <p className="text-white font-semibold">{t.name}</p>
               <p className="text-gray-500 text-xs mt-1">{t.desc}</p>
             </div>
@@ -167,13 +171,14 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="border-t border-white/10">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 py-20 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Ready to Explore Your Data?</h2>
-          <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+          <h2 className="text-3xl font-bold text-white mb-4 animate-fade-in-up">Ready to Explore Your Data?</h2>
+          <p className="text-gray-400 mb-8 max-w-lg mx-auto animate-fade-in-up" style={{ animationDelay: '100ms' }}>
             Sign up for free and start analyzing your datasets with powerful BI tools.
           </p>
           <Link
             to={user ? '/dashboard' : '/register'}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium text-lg shadow-lg shadow-blue-600/25"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium text-lg shadow-lg shadow-blue-600/25 hover:scale-105 transform hover:shadow-xl animate-pulse-glow animate-fade-in-up"
+            style={{ animationDelay: '200ms' }}
           >
             {user ? 'Go to Dashboard' : 'Start Free'} <ArrowRight className="w-5 h-5" />
           </Link>
@@ -183,15 +188,15 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="border-t border-white/10 bg-black/20">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 animate-fade-in-up">
             <div className="flex items-center gap-2 text-white font-semibold">
               <BarChart3 className="w-5 h-5" />
               BI Dashboard
             </div>
             <div className="flex items-center gap-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition">Documentation</a>
-              <a href="#" className="hover:text-white transition">GitHub</a>
-              <a href="#" className="hover:text-white transition">Contact</a>
+              <a href="#" className="hover:text-white transition hover:scale-110 transform inline-block">Documentation</a>
+              <a href="https://github.com/gregoriusamori/BI" target="_blank" rel="noopener noreferrer" className="hover:text-white transition hover:scale-110 transform inline-block">GitHub</a>
+              <a href="#" className="hover:text-white transition hover:scale-110 transform inline-block">Contact</a>
             </div>
             <p className="text-sm text-gray-500">&copy; 2026 BI Dashboard. All rights reserved.</p>
           </div>
