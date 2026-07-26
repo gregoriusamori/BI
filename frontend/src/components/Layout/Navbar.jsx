@@ -6,6 +6,10 @@ import SearchBar from '../Common/SearchBar';
 export default function Navbar({ onMenuClick }) {
   const { user, logout } = useAuth();
 
+  const initials = user?.username
+    ? user.username.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U';
+
   return (
     <nav className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -25,7 +29,20 @@ export default function Navbar({ onMenuClick }) {
         {user && <SearchBar />}
         {user ? (
           <>
-            <span className="text-sm text-gray-600 hidden sm:inline">Hi, {user.username}</span>
+            <Link to="/settings" className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1 transition">
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.username}
+                  className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                  {initials}
+                </div>
+              )}
+              <span className="text-sm text-gray-600 hidden sm:inline">{user.username}</span>
+            </Link>
             <button
               onClick={logout}
               className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"

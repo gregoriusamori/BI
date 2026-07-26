@@ -13,5 +13,6 @@ router.use('/reports', require('./reportRoutes'));
 router.use('/dynamic', require('./dynamicRoutes'));
 router.use('/search', require('./searchRoutes'));
 router.use('/data-quality', require('./dataQualityRoutes'));
+router.use('/avatar', require('./avatarRoutes'));
 
 module.exports = router;

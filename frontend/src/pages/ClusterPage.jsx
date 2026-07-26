@@ -16,14 +16,16 @@ export default function ClusterPage() {
   const [tracksError, setTracksError] = useState(null);
   const [running, setRunning] = useState(false);
   const [kValue, setKValue] = useState(5);
+  const [clusterError, setClusterError] = useState(null);
 
   const runClustering = async () => {
     setRunning(true);
+    setClusterError(null);
     try {
       await api.post('/clusters/run', { k: kValue });
       refetch();
     } catch (err) {
-      console.error('Clustering failed:', err);
+      setClusterError('Clustering failed. Please try again.');
     } finally {
       setRunning(false);
     }
@@ -71,6 +73,12 @@ export default function ClusterPage() {
           </button>
         </div>
       </div>
+
+      {clusterError && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {clusterError}
+        </div>
+      )}
 
       {(!stats || stats.length === 0) ? (
         <Card>

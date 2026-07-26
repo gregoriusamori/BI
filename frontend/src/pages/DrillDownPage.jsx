@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Music, ArrowLeft, Filter } from 'lucide-react';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
 import DataTable from '../components/Common/DataTable';
@@ -15,6 +15,7 @@ const TYPE_LABELS = {
 
 export default function DrillDownPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const type = searchParams.get('type') || '';
   const value = searchParams.get('value') || '';
   const [tracks, setTracks] = useState([]);
@@ -63,7 +64,7 @@ export default function DrillDownPage() {
       accessor: 'artist_name',
       render: (row) => (
         <button
-          onClick={() => window.location.href = `/drilldown?type=artist&value=${encodeURIComponent(row.artist_name)}`}
+          onClick={() => navigate(`/drilldown?type=artist&value=${encodeURIComponent(row.artist_name)}`)}
           className="text-blue-600 hover:underline"
         >
           {row.artist_name}
@@ -75,7 +76,7 @@ export default function DrillDownPage() {
       accessor: 'genre_name',
       render: (row) => (
         <button
-          onClick={() => window.location.href = `/drilldown?type=genre&value=${encodeURIComponent(row.genre_name)}`}
+          onClick={() => navigate(`/drilldown?type=genre&value=${encodeURIComponent(row.genre_name)}`)}
           className="text-purple-600 hover:underline"
         >
           {row.genre_name}
@@ -90,9 +91,9 @@ export default function DrillDownPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link to={-1} className="p-2 hover:bg-gray-200 rounded-lg transition">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-200 rounded-lg transition">
           <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </Link>
+        </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
             {TYPE_LABELS[type]}: <span className="text-blue-600">{value}</span>

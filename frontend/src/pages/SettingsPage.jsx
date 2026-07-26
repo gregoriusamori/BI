@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/Common/Card';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
-import { User, Lock, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Lock, Save, CheckCircle, AlertCircle, Camera, Trash2, Image } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateAvatar } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const fileInputRef = useRef(null);
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -24,16 +25,74 @@ export default function SettingsPage() {
   const [passwordError, setPasswordError] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
 
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(null);
+
   useEffect(() => {
     api.get('/auth/profile')
       .then(res => {
         setProfile(res.data);
         setUsername(res.data.username);
         setEmail(res.data.email);
+        if (res.data.avatar) {
+          setPreviewUrl(res.data.avatar);
+        }
       })
       .catch(() => setError('Failed to load profile'))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError('File size must be less than 2MB');
+      return;
+    }
+
+    const localPreview = URL.createObjectURL(file);
+    setPreviewUrl(localPreview);
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    setUploadingAvatar(true);
+    setAvatarError('');
+
+    try {
+      const res = await api.post('/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      URL.revokeObjectURL(localPreview);
+      setPreviewUrl(res.data.avatar);
+      updateAvatar(res.data.avatar);
+      setProfile(prev => ({ ...prev, avatar: res.data.avatar }));
+    } catch (err) {
+      URL.revokeObjectURL(localPreview);
+      setAvatarError(err.response?.data?.error || 'Failed to upload avatar');
+      setPreviewUrl(profile?.avatar || null);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setUploadingAvatar(true);
+    setAvatarError('');
+
+    try {
+      await api.delete('/avatar');
+      setPreviewUrl(null);
+      updateAvatar(null);
+      setProfile(prev => ({ ...prev, avatar: null }));
+    } catch (err) {
+      setAvatarError('Failed to remove avatar');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -86,9 +145,76 @@ export default function SettingsPage() {
   if (loading) return <LoadingSpinner text="Loading settings..." />;
   if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
 
+  const initials = profile?.username
+    ? profile.username.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U';
+
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
+
+      {/* Avatar Section */}
+      <Card title="Profile Picture">
+        <div className="flex items-center gap-6">
+          <div className="relative group">
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt="Avatar"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold border-2 border-gray-200">
+                {initials}
+              </div>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+            >
+              <Camera className="w-6 h-6 text-white" />
+            </button>
+          </div>
+
+          <div className="flex-1">
+            <p className="text-sm text-gray-600 mb-2">
+              {uploadingAvatar ? 'Uploading...' : 'Click on avatar to change'}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium disabled:opacity-50"
+              >
+                <Image className="w-4 h-4" />
+                Upload
+              </button>
+              {previewUrl && (
+                <button
+                  onClick={handleRemoveAvatar}
+                  disabled={uploadingAvatar}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition text-sm font-medium disabled:opacity-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Remove
+                </button>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
+            {avatarError && (
+              <p className="text-red-500 text-xs mt-2">{avatarError}</p>
+            )}
+            <p className="text-xs text-gray-400 mt-2">JPG, PNG, GIF, or WebP. Max 2MB.</p>
+          </div>
+        </div>
+      </Card>
 
       {/* Profile Section */}
       <Card title="Profile Information">

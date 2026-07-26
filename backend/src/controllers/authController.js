@@ -3,7 +3,8 @@ const AuthService = require('../services/authService');
 const authController = {
   async register(req, res, next) {
     try {
-      const user = await AuthService.register(req.body);
+      const { username, email, password } = req.body;
+      const user = await AuthService.register({ username, email, password });
       res.status(201).json({ message: 'User registered', user });
     } catch (err) {
       next(err);

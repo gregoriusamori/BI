@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BarChart3, Database, GitBranch, FileText, Upload, PieChart, ArrowRight, Users, Music, Disc, Calendar, ChevronRight, Layers, Zap, Target, Github } from 'lucide-react';
+import { BarChart3, Database, GitBranch, FileText, Upload, ArrowRight, Users, Music, Disc, Calendar, ChevronRight, Layers, Zap } from 'lucide-react';
 
 const features = [
   { icon: BarChart3, title: 'BI Analysis', desc: 'Interactive charts and real-time analytics for deep data understanding.' },

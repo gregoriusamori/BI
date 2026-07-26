@@ -15,19 +15,27 @@ const User = {
   },
 
   async findById(id) {
-    const result = await pool.query('SELECT id, username, email, role, created_at FROM users WHERE id = $1', [id]);
+    const result = await pool.query('SELECT id, username, email, role, avatar, created_at FROM users WHERE id = $1', [id]);
     return result.rows[0];
   },
 
   async findAll() {
-    const result = await pool.query('SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC');
+    const result = await pool.query('SELECT id, username, email, role, avatar, created_at FROM users ORDER BY created_at DESC');
     return result.rows;
   },
 
   async updateProfile(id, { username, email }) {
     const result = await pool.query(
-      'UPDATE users SET username = $1, email = $2 WHERE id = $3 RETURNING id, username, email, role, created_at',
+      'UPDATE users SET username = $1, email = $2 WHERE id = $3 RETURNING id, username, email, role, avatar, created_at',
       [username, email, id]
+    );
+    return result.rows[0];
+  },
+
+  async updateAvatar(id, avatarPath) {
+    const result = await pool.query(
+      'UPDATE users SET avatar = $1 WHERE id = $2 RETURNING id, username, email, role, avatar',
+      [avatarPath, id]
     );
     return result.rows[0];
   },

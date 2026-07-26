@@ -22,8 +22,13 @@ app.get('/health', (req, res) => {
 
 app.use(errorHandler);
 
-initDatabase().then(() => {
-  app.listen(config.port, () => {
-    console.log(`Server running on port ${config.port}`);
+initDatabase()
+  .then(() => {
+    app.listen(config.port, () => {
+      console.log(`Server running on port ${config.port}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to initialize database:', err.message);
+    process.exit(1);
   });
-});

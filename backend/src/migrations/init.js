@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
   role VARCHAR(20) DEFAULT 'user',
+  avatar VARCHAR(500),
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -83,6 +84,11 @@ CREATE TABLE IF NOT EXISTS import_history (
 INSERT INTO users (username, email, password, role) VALUES
   ('admin', 'admin@bi.com', '$2a$10$RWtuk/5FK/Cu6YFQveio2OGSCcDzNzyacrRkl5r2xEEtU89HdnqzW', 'admin')
 ON CONFLICT (email) DO NOTHING;
+
+DO $$ BEGIN
+  ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(500);
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
 `;
 
 async function initDatabase() {

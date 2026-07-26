@@ -34,7 +34,7 @@ const AuthService = {
 
     return {
       token,
-      user: { id: user.id, username: user.username, email: user.email, role: user.role },
+      user: { id: user.id, username: user.username, email: user.email, role: user.role, avatar: user.avatar },
     };
   },
 
