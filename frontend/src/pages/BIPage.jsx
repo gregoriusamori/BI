@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import Card from '../components/Common/Card';
 import StatCard from '../components/Common/StatCard';
@@ -6,6 +7,7 @@ import ErrorMessage from '../components/Common/ErrorMessage';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, LineChart, Line } from 'recharts';
 
 export default function BIPage() {
+  const navigate = useNavigate();
   const { data: overview, loading: l1, error: e1, refetch: r1 } = useFetch('/bi/overview');
   const { data: genres, loading: l2, error: e2, refetch: r2 } = useFetch('/bi/genre-distribution');
   const { data: audioStats, loading: l3, error: e3, refetch: r3 } = useFetch('/bi/audio-features');
@@ -68,7 +70,13 @@ export default function BIPage() {
               <XAxis type="number" />
               <YAxis dataKey="genre_name" type="category" width={100} tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Bar dataKey="count" fill="#8B5CF6" radius={[0, 4, 4, 0]} />
+              <Bar
+                dataKey="count"
+                fill="#8B5CF6"
+                radius={[0, 4, 4, 0]}
+                cursor="pointer"
+                onClick={(data) => navigate(`/drilldown?type=genre&value=${encodeURIComponent(data.genre_name)}`)}
+              />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -79,7 +87,14 @@ export default function BIPage() {
               <XAxis dataKey="year" tick={{ fontSize: 11 }} />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="track_count" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
+              <Line
+                type="monotone"
+                dataKey="track_count"
+                stroke="#F59E0B"
+                strokeWidth={2}
+                dot={{ r: 4, cursor: 'pointer' }}
+                onClick={(data) => navigate(`/drilldown?type=year&value=${data.year}`)}
+              />
             </LineChart>
           </ResponsiveContainer>
         </Card>

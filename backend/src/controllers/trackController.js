@@ -43,6 +43,19 @@ const trackController = {
       next(err);
     }
   },
+
+  async filter(req, res, next) {
+    try {
+      const { genre, artist, year, decade, search, limit } = req.query;
+      const tracks = await Track.filter(
+        { genre, artist, year, decade, search },
+        parseInt(limit) || 100
+      );
+      res.json({ tracks, total: tracks.length });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = trackController;

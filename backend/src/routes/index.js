@@ -11,5 +11,7 @@ router.use('/mining', require('./miningRoutes'));
 router.use('/clusters', require('./clusterRoutes'));
 router.use('/reports', require('./reportRoutes'));
 router.use('/dynamic', require('./dynamicRoutes'));
+router.use('/search', require('./searchRoutes'));
+router.use('/data-quality', require('./dataQualityRoutes'));
 
 module.exports = router;

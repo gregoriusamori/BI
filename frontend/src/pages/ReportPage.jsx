@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import Card from '../components/Common/Card';
 import DataTable from '../components/Common/DataTable';
@@ -9,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import { Download, FileText } from 'lucide-react';
 
 export default function ReportPage() {
+  const navigate = useNavigate();
   const { data: summary, loading: l1, error: e1, refetch: r1 } = useFetch('/reports/summary');
   const { data: genreReport, loading: l2, error: e2, refetch: r2 } = useFetch('/reports/genre');
   const { data: artistReport, loading: l3, error: e3, refetch: r3 } = useFetch('/reports/artist?limit=15');
@@ -22,7 +24,18 @@ export default function ReportPage() {
   if (error) return <ErrorMessage message={error} onRetry={() => { r1(); r2(); r3(); r4(); }} />;
 
   const genreColumns = [
-    { header: 'Genre', accessor: 'genre_name' },
+    {
+      header: 'Genre',
+      accessor: 'genre_name',
+      render: (row) => (
+        <button
+          onClick={() => navigate(`/drilldown?type=genre&value=${encodeURIComponent(row.genre_name)}`)}
+          className="text-blue-600 hover:underline font-medium"
+        >
+          {row.genre_name}
+        </button>
+      ),
+    },
     { header: 'Tracks', accessor: 'total_tracks' },
     { header: 'Avg Popularity', accessor: 'avg_popularity' },
     { header: 'Avg Energy', accessor: 'avg_energy' },
@@ -30,7 +43,18 @@ export default function ReportPage() {
   ];
 
   const artistColumns = [
-    { header: 'Artist', accessor: 'artist_name' },
+    {
+      header: 'Artist',
+      accessor: 'artist_name',
+      render: (row) => (
+        <button
+          onClick={() => navigate(`/drilldown?type=artist&value=${encodeURIComponent(row.artist_name)}`)}
+          className="text-blue-600 hover:underline font-medium"
+        >
+          {row.artist_name}
+        </button>
+      ),
+    },
     { header: 'Tracks', accessor: 'total_tracks' },
     { header: 'Avg Popularity', accessor: 'avg_popularity' },
     { header: 'Avg Energy', accessor: 'avg_energy' },
@@ -113,7 +137,13 @@ export default function ReportPage() {
               <XAxis dataKey="genre_name" tick={{ fontSize: 10 }} />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="total_tracks" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="total_tracks"
+                fill="#3B82F6"
+                radius={[4, 4, 0, 0]}
+                cursor="pointer"
+                onClick={(data) => navigate(`/drilldown?type=genre&value=${encodeURIComponent(data.genre_name)}`)}
+              />
             </BarChart>
           </ResponsiveContainer>
           <div className="mt-4">
@@ -159,14 +189,34 @@ export default function ReportPage() {
               <YAxis yAxisId="right" orientation="right" domain={[0, 100]} label={{ value: 'Avg Popularity', angle: 90, position: 'insideRight', style: { fill: '#10B981' } }} />
               <Tooltip />
               <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="total_tracks" name="Total Tracks" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="total_tracks"
+                name="Total Tracks"
+                stroke="#3B82F6"
+                strokeWidth={2}
+                dot={{ r: 4, cursor: 'pointer' }}
+                onClick={(data) => navigate(`/drilldown?type=decade&value=${data.decade}`)}
+              />
               <Line yAxisId="right" type="monotone" dataKey="avg_popularity" name="Avg Popularity" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
           <div className="mt-4">
             <DataTable
               columns={[
-                { header: 'Decade', accessor: 'decade' },
+                {
+                  header: 'Decade',
+                  accessor: 'decade',
+                  render: (row) => (
+                    <button
+                      onClick={() => navigate(`/drilldown?type=decade&value=${row.decade}`)}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      {row.decade}s
+                    </button>
+                  ),
+                },
                 { header: 'Tracks', accessor: 'total_tracks' },
                 { header: 'Avg Popularity', accessor: 'avg_popularity' },
                 { header: 'Avg Energy', accessor: 'avg_energy' },

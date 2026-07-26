@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const trackController = require('../controllers/trackController');
 
+router.get('/filter', trackController.filter);
 router.get('/', trackController.getAll);
 router.get('/:id', trackController.getById);
 router.get('/genre/:genre', trackController.getByGenre);

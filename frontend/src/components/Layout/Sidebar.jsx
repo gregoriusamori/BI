@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, BarChart3, Upload, Database, GitBranch, FileText, Table2, X } from 'lucide-react';
+import { LayoutDashboard, BarChart3, Upload, Database, GitBranch, FileText, Table2, ShieldCheck, Settings, X } from 'lucide-react';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -11,6 +11,7 @@ const navItems = [
   { path: '/clusters', label: 'Clustering', icon: GitBranch },
   { path: '/reports', label: 'Reports', icon: FileText },
   { path: '/dynamic', label: 'Dynamic Tables', icon: Table2 },
+  { path: '/data-quality', label: 'Data Quality', icon: ShieldCheck },
 ];
 
 export default function Sidebar({ open, onClose }) {
@@ -62,7 +63,21 @@ export default function Sidebar({ open, onClose }) {
             );
           })}
         </nav>
-        <div className="p-4 border-t border-gray-700 text-xs text-gray-500">
+        <div className="p-3 border-t border-gray-700">
+          <Link
+            to="/settings"
+            onClick={onClose}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+              location.pathname === '/settings'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            <Settings className="w-5 h-5" />
+            Settings
+          </Link>
+        </div>
+        <div className="px-4 pb-4 text-xs text-gray-500">
           BI Dashboard v1.0
         </div>
       </aside>

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import StatCard from '../components/Common/StatCard';
 import Card from '../components/Common/Card';
@@ -9,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 const COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#84CC16'];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { data: overview, loading: l1, error: e1, refetch: r1 } = useFetch('/bi/overview');
   const { data: genres, loading: l2, error: e2, refetch: r2 } = useFetch('/bi/genre-distribution');
   const { data: yearTrend, loading: l3, error: e3, refetch: r3 } = useFetch('/bi/year-trend');
@@ -38,7 +40,13 @@ export default function Dashboard() {
               <XAxis dataKey="genre_name" tick={{ fontSize: 11 }} />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="count" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="count"
+                fill="#3B82F6"
+                radius={[4, 4, 0, 0]}
+                cursor="pointer"
+                onClick={(data) => navigate(`/drilldown?type=genre&value=${encodeURIComponent(data.genre_name)}`)}
+              />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -49,7 +57,14 @@ export default function Dashboard() {
               <XAxis dataKey="year" tick={{ fontSize: 11 }} />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="track_count" stroke="#3B82F6" strokeWidth={2} dot={false} />
+              <Line
+                type="monotone"
+                dataKey="track_count"
+                stroke="#3B82F6"
+                strokeWidth={2}
+                dot={{ r: 4, cursor: 'pointer' }}
+                onClick={(data) => navigate(`/drilldown?type=year&value=${data.year}`)}
+              />
             </LineChart>
           </ResponsiveContainer>
         </Card>
@@ -59,18 +74,22 @@ export default function Dashboard() {
         <Card title="Top Artists">
           <div className="space-y-3">
             {topArtists?.map((a, i) => (
-              <div key={i} className="flex items-center justify-between">
+              <button
+                key={i}
+                onClick={() => navigate(`/drilldown?type=artist&value=${encodeURIComponent(a.artist_name)}`)}
+                className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-1 -m-1 transition"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
                     {i + 1}
                   </div>
-                  <span className="text-sm font-medium text-gray-700">{a.artist_name}</span>
+                  <span className="text-sm font-medium text-gray-700 text-left">{a.artist_name}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-sm font-semibold text-gray-800">{a.track_count} tracks</span>
                   <span className="text-xs text-gray-400 ml-2">avg {Number(a.avg_popularity).toFixed(1)}</span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </Card>
@@ -86,6 +105,8 @@ export default function Dashboard() {
                 cy="50%"
                 outerRadius={100}
                 label={({ genre_name, percent }) => `${genre_name} ${(percent * 100).toFixed(0)}%`}
+                cursor="pointer"
+                onClick={(data) => navigate(`/drilldown?type=genre&value=${encodeURIComponent(data.genre_name)}`)}
               >
                 {genres?.slice(0, 8).map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />

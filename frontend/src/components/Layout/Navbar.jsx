@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { BarChart3, LogIn, UserPlus, Menu } from 'lucide-react';
+import SearchBar from '../Common/SearchBar';
 
 export default function Navbar({ onMenuClick }) {
   const { user, logout } = useAuth();
@@ -21,6 +22,7 @@ export default function Navbar({ onMenuClick }) {
       </div>
 
       <div className="flex items-center gap-3">
+        {user && <SearchBar />}
         {user ? (
           <>
             <span className="text-sm text-gray-600 hidden sm:inline">Hi, {user.username}</span>

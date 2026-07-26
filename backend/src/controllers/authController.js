@@ -27,6 +27,24 @@ const authController = {
       next(err);
     }
   },
+
+  async updateProfile(req, res, next) {
+    try {
+      const user = await AuthService.updateProfile(req.user.id, req.body);
+      res.json({ message: 'Profile updated', user });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async changePassword(req, res, next) {
+    try {
+      const result = await AuthService.changePassword(req.user.id, req.body);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = authController;

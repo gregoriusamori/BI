@@ -54,6 +54,90 @@ const Track = {
     return result.rows;
   },
 
+  async findByArtist(artistName, limit = 100) {
+    const result = await pool.query(
+      `SELECT t.*, a.artist_name, g.genre_name
+       FROM tbl_track t
+       LEFT JOIN tbl_artist a ON t.artist_id = a.artist_id
+       LEFT JOIN tbl_genre g ON t.genre_id = g.genre_id
+       WHERE a.artist_name = $1
+       ORDER BY t.year, t.track_name
+       LIMIT $2`,
+      [artistName, limit]
+    );
+    return result.rows;
+  },
+
+  async findByYear(year, limit = 200) {
+    const result = await pool.query(
+      `SELECT t.*, a.artist_name, g.genre_name
+       FROM tbl_track t
+       LEFT JOIN tbl_artist a ON t.artist_id = a.artist_id
+       LEFT JOIN tbl_genre g ON t.genre_id = g.genre_id
+       WHERE t.year = $1
+       ORDER BY t.track_name
+       LIMIT $2`,
+      [year, limit]
+    );
+    return result.rows;
+  },
+
+  async findByDecade(decade, limit = 500) {
+    const result = await pool.query(
+      `SELECT t.*, a.artist_name, g.genre_name
+       FROM tbl_track t
+       LEFT JOIN tbl_artist a ON t.artist_id = a.artist_id
+       LEFT JOIN tbl_genre g ON t.genre_id = g.genre_id
+       WHERE t.decade = $1
+       ORDER BY t.year, t.track_name
+       LIMIT $2`,
+      [decade, limit]
+    );
+    return result.rows;
+  },
+
+  async filter({ genre, artist, year, decade, search }, limit = 100) {
+    let query = `
+      SELECT t.*, a.artist_name, g.genre_name,
+             p.popularity_score
+      FROM tbl_track t
+      LEFT JOIN tbl_artist a ON t.artist_id = a.artist_id
+      LEFT JOIN tbl_genre g ON t.genre_id = g.genre_id
+      LEFT JOIN tbl_track_popularity p ON t.track_id = p.track_id
+      WHERE 1=1
+    `;
+    const params = [];
+    let idx = 1;
+
+    if (genre) {
+      query += ` AND g.genre_name = $${idx++}`;
+      params.push(genre);
+    }
+    if (artist) {
+      query += ` AND a.artist_name = $${idx++}`;
+      params.push(artist);
+    }
+    if (year) {
+      query += ` AND t.year = $${idx++}`;
+      params.push(parseInt(year));
+    }
+    if (decade) {
+      query += ` AND t.decade = $${idx++}`;
+      params.push(parseInt(decade));
+    }
+    if (search) {
+      query += ` AND (t.track_name ILIKE $${idx} OR a.artist_name ILIKE $${idx})`;
+      params.push(`%${search}%`);
+      idx++;
+    }
+
+    query += ` ORDER BY p.popularity_score DESC NULLS LAST, t.track_name LIMIT $${idx}`;
+    params.push(limit);
+
+    const result = await pool.query(query, params);
+    return result.rows;
+  },
+
   async getAudioFeatures(trackId) {
     const result = await pool.query(
       'SELECT * FROM tbl_track_audio_features WHERE track_id = $1',

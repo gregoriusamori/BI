@@ -24,6 +24,22 @@ const User = {
     return result.rows;
   },
 
+  async updateProfile(id, { username, email }) {
+    const result = await pool.query(
+      'UPDATE users SET username = $1, email = $2 WHERE id = $3 RETURNING id, username, email, role, created_at',
+      [username, email, id]
+    );
+    return result.rows[0];
+  },
+
+  async updatePassword(id, hashedPassword) {
+    const result = await pool.query(
+      'UPDATE users SET password = $1 WHERE id = $2 RETURNING id, username, email',
+      [hashedPassword, id]
+    );
+    return result.rows[0];
+  },
+
   async updateRole(id, role) {
     const result = await pool.query(
       'UPDATE users SET role = $1 WHERE id = $2 RETURNING id, username, email, role',

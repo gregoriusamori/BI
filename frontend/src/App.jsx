@@ -12,7 +12,11 @@ import MiningPage from './pages/MiningPage';
 import ClusterPage from './pages/ClusterPage';
 import ReportPage from './pages/ReportPage';
 import DynamicPage from './pages/DynamicPage';
+import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
+import SearchPage from './pages/SearchPage';
+import DrillDownPage from './pages/DrillDownPage';
+import DataQualityPage from './pages/DataQualityPage';
 import Navbar from './components/Layout/Navbar';
 import Sidebar from './components/Layout/Sidebar';
 
@@ -55,6 +59,10 @@ function App() {
             <Route path="/clusters" element={<ProtectedRoute><DashboardLayout><ClusterPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><DashboardLayout><ReportPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/dynamic" element={<ProtectedRoute><DashboardLayout><DynamicPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/data-quality" element={<ProtectedRoute><DashboardLayout><DataQualityPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><DashboardLayout><SettingsPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><DashboardLayout><SearchPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/drilldown" element={<ProtectedRoute><DashboardLayout><DrillDownPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Router>
