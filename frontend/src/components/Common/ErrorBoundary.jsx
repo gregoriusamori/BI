@@ -18,11 +18,11 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-          <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
-            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Something went wrong</h2>
-            <p className="text-gray-500 text-sm mb-6">
+        <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4 transition-colors duration-300">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md w-full text-center transition-colors duration-300">
+            <AlertCircle className="w-16 h-16 text-red-400 dark:text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Something went wrong</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
               An unexpected error occurred. Please try refreshing the page.
             </p>
             <button

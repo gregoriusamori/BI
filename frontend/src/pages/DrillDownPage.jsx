@@ -41,7 +41,7 @@ export default function DrillDownPage() {
 
   if (!type || !value) {
     return (
-      <div className="text-center py-20 text-gray-400">
+      <div className="text-center py-20 text-gray-400 dark:text-gray-500">
         <Filter className="w-12 h-12 mx-auto mb-4 opacity-50" />
         <p>Invalid drill-down parameters</p>
       </div>
@@ -49,14 +49,14 @@ export default function DrillDownPage() {
   }
 
   if (loading) return <LoadingSpinner text={`Loading ${TYPE_LABELS[type]?.toLowerCase()} tracks...`} />;
-  if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
+  if (error) return <div className="text-center py-20 text-red-500 dark:text-red-400">{error}</div>;
 
   const columns = [
     {
       header: 'Track',
       accessor: 'track_name',
       render: (row) => (
-        <span className="font-medium text-gray-800">{row.track_name}</span>
+        <span className="font-medium text-gray-800 dark:text-gray-200">{row.track_name}</span>
       ),
     },
     {
@@ -65,7 +65,7 @@ export default function DrillDownPage() {
       render: (row) => (
         <button
           onClick={() => navigate(`/drilldown?type=artist&value=${encodeURIComponent(row.artist_name)}`)}
-          className="text-blue-600 hover:underline"
+          className="text-blue-600 dark:text-blue-400 hover:underline"
         >
           {row.artist_name}
         </button>
@@ -77,7 +77,7 @@ export default function DrillDownPage() {
       render: (row) => (
         <button
           onClick={() => navigate(`/drilldown?type=genre&value=${encodeURIComponent(row.genre_name)}`)}
-          className="text-purple-600 hover:underline"
+          className="text-purple-600 dark:text-purple-400 hover:underline"
         >
           {row.genre_name}
         </button>
@@ -91,14 +91,14 @@ export default function DrillDownPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-200 rounded-lg transition">
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition">
+          <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            {TYPE_LABELS[type]}: <span className="text-blue-600">{value}</span>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+            {TYPE_LABELS[type]}: <span className="text-blue-600 dark:text-blue-400">{value}</span>
           </h1>
-          <p className="text-gray-500 text-sm">{tracks.length} track{tracks.length !== 1 ? 's' : ''} found</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">{tracks.length} track{tracks.length !== 1 ? 's' : ''} found</p>
         </div>
       </div>
 

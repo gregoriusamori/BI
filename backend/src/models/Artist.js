@@ -33,19 +33,6 @@ const Artist = {
     return parseInt(result.rows[0].count);
   },
 
-  async getTopArtists(limit = 10) {
-    const result = await pool.query(
-      `SELECT a.artist_name, COUNT(t.track_id) as track_count, AVG(p.popularity_score) as avg_popularity
-       FROM tbl_artist a
-       LEFT JOIN tbl_track t ON a.artist_id = t.artist_id
-       LEFT JOIN tbl_track_popularity p ON t.track_id = p.track_id
-       GROUP BY a.artist_id, a.artist_name
-       ORDER BY track_count DESC
-       LIMIT $1`,
-      [limit]
-    );
-    return result.rows;
-  },
 };
 
 module.exports = Artist;

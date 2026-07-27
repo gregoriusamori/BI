@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, BarChart3, Upload, Database, GitBranch, FileText, Table2, ShieldCheck, Settings, X } from 'lucide-react';
+import { LayoutDashboard, BarChart3, Upload, Database, GitBranch, FileText, ShieldCheck, Settings, X } from 'lucide-react';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -10,7 +10,6 @@ const navItems = [
   { path: '/mining', label: 'Data Mining', icon: Database },
   { path: '/clusters', label: 'Clustering', icon: GitBranch },
   { path: '/reports', label: 'Reports', icon: FileText },
-  { path: '/dynamic', label: 'Dynamic Tables', icon: Table2 },
   { path: '/data-quality', label: 'Data Quality', icon: ShieldCheck },
 ];
 
@@ -31,12 +30,12 @@ export default function Sidebar({ open, onClose }) {
 
       <aside
         className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white flex flex-col
+          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gray-900 dark:bg-gray-950 text-white flex flex-col
           transform transition-transform duration-200 ease-in-out
           ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-700 dark:border-gray-800 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Menu</h2>
           <button onClick={onClose} className="lg:hidden text-gray-400 hover:text-white">
             <X className="w-5 h-5" />
@@ -54,7 +53,7 @@ export default function Sidebar({ open, onClose }) {
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   active
                     ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    : 'text-gray-300 hover:bg-gray-800 dark:hover:bg-gray-900 hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -63,14 +62,14 @@ export default function Sidebar({ open, onClose }) {
             );
           })}
         </nav>
-        <div className="p-3 border-t border-gray-700">
+        <div className="p-3 border-t border-gray-700 dark:border-gray-800">
           <Link
             to="/settings"
             onClick={onClose}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
               location.pathname === '/settings'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                : 'text-gray-300 hover:bg-gray-800 dark:hover:bg-gray-900 hover:text-white'
             }`}
           >
             <Settings className="w-5 h-5" />

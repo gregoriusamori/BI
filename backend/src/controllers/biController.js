@@ -1,4 +1,6 @@
 const BIAnalysisService = require('../services/biAnalysisService');
+const Genre = require('../models/Genre');
+const MiningService = require('../services/miningService');
 
 const biController = {
   async getOverview(req, res, next) {
@@ -12,7 +14,7 @@ const biController = {
 
   async getGenreDistribution(req, res, next) {
     try {
-      const data = await BIAnalysisService.getGenreDistribution();
+      const data = await Genre.getGenreStats();
       res.json(data);
     } catch (err) {
       next(err);
@@ -40,7 +42,7 @@ const biController = {
 
   async getAudioFeaturesStats(req, res, next) {
     try {
-      const data = await BIAnalysisService.getAudioFeaturesStats();
+      const data = await MiningService.getFeatureStats();
       res.json(data);
     } catch (err) {
       next(err);
@@ -50,6 +52,15 @@ const biController = {
   async getPopularityDistribution(req, res, next) {
     try {
       const data = await BIAnalysisService.getPopularityDistribution();
+      res.json(data);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async getAllArtists(req, res, next) {
+    try {
+      const data = await BIAnalysisService.getAllArtists();
       res.json(data);
     } catch (err) {
       next(err);

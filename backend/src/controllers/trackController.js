@@ -3,11 +3,17 @@ const Track = require('../models/Track');
 const trackController = {
   async getAll(req, res, next) {
     try {
-      const limit = parseInt(req.query.limit) || 100;
-      const offset = parseInt(req.query.offset) || 0;
-      const tracks = await Track.findAll(limit, offset);
-      const total = await Track.count();
-      res.json({ tracks, total, limit, offset });
+      const { page = 1, limit = 20, search = '', sort = 'track_id', order = 'asc', genre = '', artist = '' } = req.query;
+      const result = await Track.findAllPaginated({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        search,
+        sort,
+        order,
+        genre,
+        artist,
+      });
+      res.json(result);
     } catch (err) {
       next(err);
     }
@@ -15,11 +21,9 @@ const trackController = {
 
   async getById(req, res, next) {
     try {
-      const track = await Track.findById(req.params.id);
+      const track = await Track.findByIdFull(req.params.id);
       if (!track) return res.status(404).json({ error: 'Track not found' });
-      const audio = await Track.getAudioFeatures(req.params.id);
-      const popularity = await Track.getPopularity(req.params.id);
-      res.json({ ...track, audio_features: audio, popularity });
+      res.json(track);
     } catch (err) {
       next(err);
     }
@@ -34,10 +38,41 @@ const trackController = {
     }
   },
 
+  async create(req, res, next) {
+    try {
+      const { track_name, artist_id, genre_id } = req.body;
+      if (!track_name || !artist_id || !genre_id) {
+        return res.status(400).json({ error: 'track_name, artist_id, and genre_id are required' });
+      }
+      const track = await Track.createWithDetails(req.body);
+      res.status(201).json(track);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async update(req, res, next) {
+    try {
+      const { track_name, artist_id, genre_id } = req.body;
+      if (!track_name || !artist_id || !genre_id) {
+        return res.status(400).json({ error: 'track_name, artist_id, and genre_id are required' });
+      }
+      const existing = await Track.findById(req.params.id);
+      if (!existing) return res.status(404).json({ error: 'Track not found' });
+
+      const track = await Track.updateWithDetails(req.params.id, req.body);
+      res.json(track);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async delete(req, res, next) {
     try {
+      const existing = await Track.findById(req.params.id);
+      if (!existing) return res.status(404).json({ error: 'Track not found' });
+
       const track = await Track.delete(req.params.id);
-      if (!track) return res.status(404).json({ error: 'Track not found' });
       res.json({ message: 'Track deleted', track });
     } catch (err) {
       next(err);

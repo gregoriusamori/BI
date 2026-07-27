@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const InsightGenerator = require('../utils/insightGenerator');
 
 const MiningService = {
   async getCorrelationMatrix() {
@@ -13,7 +14,8 @@ const MiningService = {
         CORR(tempo, energy) as tempo_energy
        FROM tbl_track_audio_features`
     );
-    return result.rows[0];
+    const data = result.rows[0];
+    return { data, insight: InsightGenerator.correlation(data) };
   },
 
   async getOutliers(column) {
@@ -53,7 +55,8 @@ const MiningService = {
         MIN(tempo) as min_tempo, MAX(tempo) as max_tempo, AVG(tempo) as avg_tempo
       FROM tbl_track_audio_features
     `);
-    return result.rows[0];
+    const data = result.rows[0];
+    return { data, insight: InsightGenerator.audioFeatures(data) };
   },
 
   async getPatterns() {
@@ -64,12 +67,11 @@ const MiningService = {
         AVG(af.danceability) as avg_danceability,
         AVG(af.valence) as avg_valence,
         AVG(af.acousticness) as avg_acousticness,
-        AVG(p.popularity_score) as avg_popularity,
+        (SELECT AVG(popularity_score) FROM tbl_track_popularity WHERE track_id IN (SELECT track_id FROM tbl_track WHERE genre_id = g.genre_id)) as avg_popularity,
         COUNT(*) as track_count
       FROM tbl_track t
       JOIN tbl_genre g ON t.genre_id = g.genre_id
       JOIN tbl_track_audio_features af ON t.track_id = af.track_id
-      JOIN tbl_track_popularity p ON t.track_id = p.track_id
       GROUP BY g.genre_id, g.genre_name
       HAVING COUNT(*) >= 5
       ORDER BY avg_energy DESC

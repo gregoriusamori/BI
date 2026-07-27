@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const InsightGenerator = require('../utils/insightGenerator');
 
 const Genre = {
   async create(genreName, genreCategory = null) {
@@ -27,14 +28,15 @@ const Genre = {
 
   async getGenreStats() {
     const result = await pool.query(
-      `SELECT g.genre_name, COUNT(t.track_id) as track_count, AVG(p.popularity_score) as avg_popularity
+      `SELECT g.genre_name, COUNT(t.track_id) as track_count,
+              (SELECT AVG(popularity_score) FROM tbl_track_popularity WHERE track_id IN (SELECT track_id FROM tbl_track WHERE genre_id = g.genre_id)) as avg_popularity
        FROM tbl_genre g
-       LEFT JOIN tbl_track t ON g.genre_id = t.genre_id
-       LEFT JOIN tbl_track_popularity p ON t.track_id = p.track_id
+       JOIN tbl_track t ON g.genre_id = t.genre_id
        GROUP BY g.genre_id, g.genre_name
        ORDER BY track_count DESC`
     );
-    return result.rows;
+    const rows = result.rows;
+    return { data: rows, insight: InsightGenerator.genreShare(rows) };
   },
 };
 

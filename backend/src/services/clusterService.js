@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const InsightGenerator = require('../utils/insightGenerator');
 
 const ClusterService = {
   async getClusters() {
@@ -11,15 +12,15 @@ const ClusterService = {
   async getClusteredTracks(clusterId) {
     const result = await pool.query(
       `SELECT t.track_name, a.artist_name, g.genre_name, tc.cluster_id, tc.cluster_label,
-              af.danceability, af.energy, af.valence, p.popularity_score
+              af.danceability, af.energy, af.valence,
+              (SELECT popularity_score FROM tbl_track_popularity WHERE track_id = tc.track_id LIMIT 1) as popularity_score
        FROM tbl_track_clusters tc
        JOIN tbl_track t ON tc.track_id = t.track_id
        LEFT JOIN tbl_artist a ON t.artist_id = a.artist_id
        LEFT JOIN tbl_genre g ON t.genre_id = g.genre_id
-       LEFT JOIN tbl_track_audio_features af ON t.track_id = af.track_id
-       LEFT JOIN tbl_track_popularity p ON t.track_id = p.track_id
+       LEFT JOIN tbl_track_audio_features af ON tc.track_id = af.track_id
        WHERE tc.cluster_id = $1
-       ORDER BY p.popularity_score DESC
+       ORDER BY popularity_score DESC
        LIMIT 50`,
       [clusterId]
     );
@@ -39,7 +40,8 @@ const ClusterService = {
        GROUP BY tc.cluster_id, tc.cluster_label
        ORDER BY tc.cluster_id`
     );
-    return result.rows;
+    const rows = result.rows;
+    return { data: rows, insight: InsightGenerator.clusterStats(rows) };
   },
 
   async getGenreByCluster() {
@@ -55,6 +57,10 @@ const ClusterService = {
   },
 
   async runClustering(k = 5) {
+    if (k < 2 || k > 10) {
+      throw { status: 400, message: 'K must be between 2 and 10' };
+    }
+
     const result = await pool.query(`
       WITH features AS (
         SELECT track_id, danceability, energy, loudness, speechiness,
@@ -63,33 +69,62 @@ const ClusterService = {
       ),
       normalized AS (
         SELECT track_id,
-          (danceability - (SELECT MIN(danceability) FROM features)) / NULLIF((SELECT MAX(danceability) - MIN(danceability) FROM features), 0) as n_dance,
-          (energy - (SELECT MIN(energy) FROM features)) / NULLIF((SELECT MAX(energy) - MIN(energy) FROM features), 0) as n_energy,
-          (valence - (SELECT MIN(valence) FROM features)) / NULLIF((SELECT MAX(valence) - MIN(valence) FROM features), 0) as n_valence,
-          (acousticness - (SELECT MIN(acousticness) FROM features)) / NULLIF((SELECT MAX(acousticness) - MIN(acousticness) FROM features), 0) as n_acoustic,
-          (tempo - (SELECT MIN(tempo) FROM features)) / NULLIF((SELECT MAX(tempo) - MIN(tempo) FROM features), 0) as n_tempo
+          CASE WHEN MAX(danceability) - MIN(danceability) = 0 THEN 0
+            ELSE (danceability - MIN(danceability)) / (MAX(danceability) - MIN(danceability)) END as n_dance,
+          CASE WHEN MAX(energy) - MIN(energy) = 0 THEN 0
+            ELSE (energy - MIN(energy)) / (MAX(energy) - MIN(energy)) END as n_energy,
+          CASE WHEN MAX(valence) - MIN(valence) = 0 THEN 0
+            ELSE (valence - MIN(valence)) / (MAX(valence) - MIN(valence)) END as n_valence,
+          CASE WHEN MAX(acousticness) - MIN(acousticness) = 0 THEN 0
+            ELSE (acousticness - MIN(acousticness)) / (MAX(acousticness) - MIN(acousticness)) END as n_acoustic,
+          CASE WHEN MAX(tempo) - MIN(tempo) = 0 THEN 0
+            ELSE (tempo - MIN(tempo)) / (MAX(tempo) - MIN(tempo)) END as n_tempo
         FROM features
+        GROUP BY track_id, danceability, energy, valence, acousticness, tempo
       )
       SELECT * FROM normalized
     `);
 
     const data = result.rows;
-    const maxIter = 50;
+    if (data.length === 0) {
+      throw { status: 400, message: 'No data available for clustering' };
+    }
 
-    let centroids = data.slice(0, k).map(d => [d.n_dance, d.n_energy, d.n_valence, d.n_acoustic, d.n_tempo]);
+    const maxIter = 50;
+    const dims = 5;
+
+    let centroids = [];
+    const step = Math.floor(data.length / k);
+    for (let i = 0; i < k; i++) {
+      const idx = Math.min(i * step, data.length - 1);
+      centroids.push([
+        data[idx].n_dance || 0,
+        data[idx].n_energy || 0,
+        data[idx].n_valence || 0,
+        data[idx].n_acoustic || 0,
+        data[idx].n_tempo || 0,
+      ]);
+    }
+
     let assignments = new Array(data.length).fill(0);
 
     for (let iter = 0; iter < maxIter; iter++) {
       let changed = false;
 
       for (let i = 0; i < data.length; i++) {
-        const point = [data[i].n_dance || 0, data[i].n_energy || 0, data[i].n_valence || 0, data[i].n_acoustic || 0, data[i].n_tempo || 0];
+        const point = [
+          data[i].n_dance || 0,
+          data[i].n_energy || 0,
+          data[i].n_valence || 0,
+          data[i].n_acoustic || 0,
+          data[i].n_tempo || 0,
+        ];
         let minDist = Infinity;
         let bestCluster = 0;
 
         for (let c = 0; c < k; c++) {
           let dist = 0;
-          for (let d = 0; d < point.length; d++) {
+          for (let d = 0; d < dims; d++) {
             dist += Math.pow(point[d] - centroids[c][d], 2);
           }
           if (dist < minDist) {
@@ -109,7 +144,7 @@ const ClusterService = {
       for (let c = 0; c < k; c++) {
         const members = data.filter((_, i) => assignments[i] === c);
         if (members.length > 0) {
-          for (let d = 0; d < centroids[c].length; d++) {
+          for (let d = 0; d < dims; d++) {
             centroids[c][d] = members.reduce((sum, m) => {
               const val = [m.n_dance, m.n_energy, m.n_valence, m.n_acoustic, m.n_tempo][d];
               return sum + (val || 0);
@@ -119,19 +154,43 @@ const ClusterService = {
       }
     }
 
-    await pool.query('DELETE FROM tbl_track_clusters');
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('DELETE FROM tbl_track_clusters');
 
-    const defaultLabels = ['Low Energy Acoustic', 'High Speechiness', 'Instrumental', 'High Energy', 'Happy/Upbeat'];
-    const labels = defaultLabels.slice(0, k);
-    while (labels.length < k) {
-      labels.push(`Cluster ${labels.length}`);
-    }
+      const defaultLabels = [
+        'Low Energy Acoustic', 'High Speechiness', 'Instrumental',
+        'High Energy', 'Happy/Upbeat', 'Mellow', 'Intense', 'Chill',
+        'Dynamic', 'Ambient',
+      ];
 
-    for (let i = 0; i < data.length; i++) {
-      await pool.query(
-        'INSERT INTO tbl_track_clusters (track_id, cluster_id, cluster_label) VALUES ($1, $2, $3)',
-        [data[i].track_id, assignments[i], labels[assignments[i]]]
-      );
+      const batchSize = 500;
+      for (let start = 0; start < data.length; start += batchSize) {
+        const end = Math.min(start + batchSize, data.length);
+        const values = [];
+        const params = [];
+        let paramIdx = 1;
+
+        for (let i = start; i < end; i++) {
+          const clusterId = assignments[i];
+          const label = defaultLabels[clusterId] || `Cluster ${clusterId}`;
+          values.push(`($${paramIdx++}, $${paramIdx++}, $${paramIdx++})`);
+          params.push(data[i].track_id, clusterId, label);
+        }
+
+        await client.query(
+          `INSERT INTO tbl_track_clusters (track_id, cluster_id, cluster_label) VALUES ${values.join(',')}`,
+          params
+        );
+      }
+
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
     }
 
     return { clusters: k, tracks: data.length };

@@ -1,4 +1,5 @@
 const Artist = require('../models/Artist');
+const BIAnalysisService = require('../services/biAnalysisService');
 
 const artistController = {
   async getAll(req, res, next) {
@@ -26,7 +27,7 @@ const artistController = {
   async getTop(req, res, next) {
     try {
       const limit = parseInt(req.query.limit) || 10;
-      const artists = await Artist.getTopArtists(limit);
+      const artists = await BIAnalysisService.getTopArtists(limit);
       res.json(artists);
     } catch (err) {
       next(err);

@@ -1,40 +1,39 @@
 import { CheckCircle, AlertTriangle, XCircle, BarChart3 } from 'lucide-react';
 import useFetch from '../hooks/useFetch';
+import { useTheme } from '../context/ThemeContext';
 import Card from '../components/Common/Card';
 import StatCard from '../components/Common/StatCard';
 import DataTable from '../components/Common/DataTable';
-import LoadingSpinner from '../components/Common/LoadingSpinner';
+import { SkeletonDashboard } from '../components/Common/Skeleton';
 import ErrorMessage from '../components/Common/ErrorMessage';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { getChartColors } from '../utils/chartTheme';
 
 export default function DataQualityPage() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const colors = getChartColors(isDark);
   const { data: summary, loading: l1, error: e1, refetch: r1 } = useFetch('/data-quality/summary');
   const { data: completeness, loading: l2, error: e2, refetch: r2 } = useFetch('/data-quality/completeness');
   const { data: duplicates, loading: l3, error: e3, refetch: r3 } = useFetch('/data-quality/duplicates');
-  const { data: outliers, loading: l4, error: e4, refetch: r4 } = useFetch('/data-quality/outliers');
+  const { data: outliers, loading: l4, error: e4, refetch: r4 } = useFetch('/data-quality/outlier-summary');
 
   const loading = l1 || l2 || l3 || l4;
   const error = e1 || e2 || e3 || e4;
 
-  if (loading) return <LoadingSpinner text="Analyzing data quality..." />;
+  if (loading) return <SkeletonDashboard />;
   if (error) return <ErrorMessage message={error} onRetry={() => { r1(); r2(); r3(); r4(); }} />;
 
   const getScoreColor = (pct) => {
-    if (pct >= 95) return 'text-green-600';
-    if (pct >= 80) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getScoreBg = (pct) => {
-    if (pct >= 95) return 'bg-green-100';
-    if (pct >= 80) return 'bg-yellow-100';
-    return 'bg-red-100';
+    if (pct >= 95) return 'text-green-600 dark:text-green-400';
+    if (pct >= 80) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-red-600 dark:text-red-400';
   };
 
   const getScoreIcon = (pct) => {
-    if (pct >= 95) return <CheckCircle className="w-5 h-5 text-green-600" />;
-    if (pct >= 80) return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
-    return <XCircle className="w-5 h-5 text-red-600" />;
+    if (pct >= 95) return <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />;
+    if (pct >= 80) return <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />;
+    return <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />;
   };
 
   const avgCompleteness = completeness?.columns
@@ -63,8 +62,8 @@ export default function DataQualityPage() {
       accessor: 'column',
       render: (row) => (
         <div>
-          <span className="font-medium text-gray-800">{row.column}</span>
-          <span className="text-xs text-gray-400 ml-2">{row.table}</span>
+          <span className="font-medium text-gray-800 dark:text-gray-200">{row.column}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">{row.table}</span>
         </div>
       ),
     },
@@ -79,11 +78,11 @@ export default function DataQualityPage() {
               <span className={`text-sm font-semibold ${getScoreColor(parseFloat(row.completeness))}`}>
                 {row.completeness}%
               </span>
-              <span className="text-xs text-gray-400">{row.filled}/{row.total}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{row.filled}/{row.total}</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
-                className={`h-2 rounded-full ${parseFloat(row.completeness) >= 95 ? 'bg-green-500' : parseFloat(row.completeness) >= 80 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                className={`h-2 rounded-full transition-all duration-1000 ease-out ${parseFloat(row.completeness) >= 95 ? 'bg-green-500' : parseFloat(row.completeness) >= 80 ? 'bg-yellow-500' : 'bg-red-500'}`}
                 style={{ width: `${row.completeness}%` }}
               />
             </div>
@@ -96,7 +95,7 @@ export default function DataQualityPage() {
       accessor: 'nulls',
       align: 'right',
       render: (row) => (
-        <span className={`font-medium ${row.nulls > 0 ? 'text-red-600' : 'text-green-600'}`}>
+        <span className={`font-medium ${row.nulls > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
           {row.nulls.toLocaleString()}
         </span>
       ),
@@ -114,7 +113,7 @@ export default function DataQualityPage() {
       accessor: 'outliers',
       align: 'right',
       render: (row) => (
-        <span className={`font-semibold ${row.outliers > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+        <span className={`font-semibold ${row.outliers > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'}`}>
           {row.outliers.toLocaleString()}
         </span>
       ),
@@ -122,8 +121,8 @@ export default function DataQualityPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Data Quality Dashboard</h1>
+    <div className="space-y-6 animate-fade-in">
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Data Quality Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatCard label="Overall Score" value={`${avgCompleteness}%`} icon={BarChart3} color={avgCompleteness >= 95 ? 'green' : avgCompleteness >= 80 ? 'orange' : 'red'} />
@@ -136,10 +135,10 @@ export default function DataQualityPage() {
         <Card title="Column Completeness">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={completenessChart} layout="vertical">
-              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} />
-              <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 10 }} />
-              <Tooltip formatter={(v) => `${v}%`} />
-              <Bar dataKey="completeness" radius={[0, 4, 4, 0]}>
+              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11, fill: colors.axis }} />
+              <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 10, fill: colors.axis }} />
+              <Tooltip formatter={(v) => `${v}%`} contentStyle={{ backgroundColor: colors.tooltipBg, border: `1px solid ${colors.tooltipBorder}`, borderRadius: '8px', color: colors.tooltipText }} />
+              <Bar dataKey="completeness" radius={[0, 4, 4, 0]} animationDuration={1000}>
                 {completenessChart.map((entry, i) => (
                   <Cell key={i} fill={entry.completeness >= 95 ? '#10B981' : entry.completeness >= 80 ? '#F59E0B' : '#EF4444'} />
                 ))}
@@ -148,13 +147,13 @@ export default function DataQualityPage() {
           </ResponsiveContainer>
         </Card>
 
-        <Card title="Outliers by Feature">
+        <Card title="Outliers Count by Feature">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={outlierChart}>
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="outliers" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: colors.axis }} />
+              <YAxis tick={{ fill: colors.axis }} />
+              <Tooltip contentStyle={{ backgroundColor: colors.tooltipBg, border: `1px solid ${colors.tooltipBorder}`, borderRadius: '8px', color: colors.tooltipText }} />
+              <Bar dataKey="outliers" fill="#F59E0B" radius={[4, 4, 0, 0]} animationDuration={1000} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -170,7 +169,7 @@ export default function DataQualityPage() {
         </Card>
       )}
 
-      <Card title="Audio Features Statistics">
+      <Card title="Audio Features Statistics (outlier summary)">
         <DataTable columns={outlierColumns} data={outliers || []} pageSize={10} />
       </Card>
     </div>

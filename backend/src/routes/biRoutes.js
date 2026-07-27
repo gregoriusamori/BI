@@ -8,5 +8,6 @@ router.get('/year-trend', biController.getYearTrend);
 router.get('/top-artists', biController.getTopArtists);
 router.get('/audio-features', biController.getAudioFeaturesStats);
 router.get('/popularity-distribution', biController.getPopularityDistribution);
+router.get('/all-artists', biController.getAllArtists);
 
 module.exports = router;
